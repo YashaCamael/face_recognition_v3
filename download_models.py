@@ -14,6 +14,8 @@ def download_file(url, destination):
 # Set up paths
 home = os.path.expanduser("~")
 destination_path_facenet = os.path.join(home, ".deepface/weights/facenet512_weights.h5")
+destination_path_retinaface = os.path.join(home, ".deepface/weights/retinaface.h5")
 
 # Download the files from public URLs
 download_file("https://storage.googleapis.com/model_face_recognition/facenet512_weights.h5", destination_path_facenet)
+download_file("https://storage.googleapis.com/model_face_recognition/retinaface.h5", destination_path_retinaface)
