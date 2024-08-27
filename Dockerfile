@@ -1,5 +1,5 @@
 # Base Python image
-FROM python:3.10.12
+FROM asia-southeast2-docker.pkg.dev/subsidi-tepat-bbm-ai/tensorflow-base/tensorflow:2.16.1-gpu
 
 # Set the HOME environment variable to /app to use /app/.deepface/weights as the model path
 ENV HOME=/app
@@ -17,7 +17,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install any needed packages specified in requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --ignore-installed -r requirements.txt
 
 # Install Gunicorn
 RUN pip install gunicorn
