@@ -12,7 +12,7 @@ def create_app():
     logging.basicConfig(
         stream=sys.stdout,  # Send logs to stdout
         level=logging.INFO,  # Set the default log level to INFO
-        format='[%(levelname)s] %(name)s: %(message)s'
+        # format='[%(levelname)s] %(name)s: %(message)s'
     )
 
     app = Flask(__name__)
