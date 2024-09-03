@@ -5,7 +5,7 @@ blinker==1.8.2
 certifi==2024.6.2
 charset-normalizer==3.3.2
 click==8.1.7
-deepface==0.0.91
+deepface==0.0.93
 filelock==3.14.0
 fire==0.6.0
 Flask==3.0.3
