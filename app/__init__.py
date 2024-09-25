@@ -2,6 +2,7 @@ from flask import Flask
 import logging
 import sys
 import os
+from google.cloud import storage  # Import Google Cloud Storage client
 from app.services.face_verification import verify_faces
 import tensorflow as tf
 
@@ -20,6 +21,10 @@ def create_app():
 
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
+
+    # Initialize the Google Cloud Storage client using ADC
+    storage_client = storage.Client()  # No manual credentials needed with ADC
+    app.config['STORAGE_CLIENT'] = storage_client  # Store the client in app config
 
     from app.routes.verify import verify_bp
     from app.routes.home import home_bp
@@ -47,4 +52,3 @@ def detect_device():
         print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     else:
         print("DeepFace is using a CPU via TensorFlow")
-

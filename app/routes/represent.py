@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.image_represent import represent_image
-from app.utils.image_handler import save_image_from_base64, save_image_from_url
+from app.utils.image_handler import save_image_from_base64, save_image_from_url, download_image_from_gcs
 import uuid
 import os
 
@@ -34,6 +34,8 @@ def represent():
                 img_path = save_image_from_base64(instance['img_base64'], unique_filename)
             elif 'img_link' in instance:
                 img_path = save_image_from_url(instance['img_link'], unique_filename)
+            elif 'img_gcs_uri' in instance:
+                img_path = download_image_from_gcs(instance['img_gcs_uri'])
 
             if not img_path:
                 predictions.append({"error": "Please provide valid image data for one or more images"})

@@ -32,7 +32,7 @@ def represent_image(img_path, parameters):
         result = DeepFace.represent(
             img_path,
             model_name=parameters.get('model_name', 'Facenet512'),
-            detector_backend=parameters.get('detector_backend', 'opencv'),
+            detector_backend=parameters.get('detector_backend', 'retinaface'),
             enforce_detection=parameters.get('enforce_detection', True),
             align=parameters.get('align', True),
             normalization=parameters.get('normalization', 'base')
