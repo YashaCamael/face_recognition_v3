@@ -5,13 +5,43 @@ from io import BytesIO
 from flask import current_app
 import requests
 
-def save_image_from_base64(base64_str, filename):
+# Dictionary that maps image signatures to MIME types
+image_signatures = {
+    "iVBORw0KGgo": "image/png",  # PNG
+    "/9j/": "image/jpeg"         # JPEG
+}
+
+# Function to detect MIME type based on the Base64 signature
+def detect_mime_type(b64_str):
+    for signature, mime_type in image_signatures.items():
+        if b64_str.startswith(signature):
+            return mime_type
+    return None
+
+# Function to save image from Base64 string with appropriate file extension
+def save_image_from_base64(base64_str, filename_base):
+    # Detect the MIME type from the Base64 string
+    mime_type = detect_mime_type(base64_str[:20])  # Check only the first 20 chars
+    if mime_type is None:
+        raise ValueError("Unsupported image format")
+
+    # Define the file extension based on the MIME type
+    file_extension = ".png" if mime_type == "image/png" else ".jpg"
+    
+    # Combine the base filename and the file extension
+    filename = f"{filename_base}{file_extension}"
+    
+    # Define the path to save the image
     img_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    
+    # Decode the Base64 string and save the image
     img_data = base64.b64decode(base64_str)
     img = Image.open(BytesIO(img_data))
     img.save(img_path)
+    
     return img_path
 
+# Function to save image from URL
 def save_image_from_url(url, filename):
     response = requests.get(url)
     img_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
@@ -20,6 +50,7 @@ def save_image_from_url(url, filename):
             f.write(response.content)
     return img_path
 
+# Function to download image from GCS
 def download_image_from_gcs(gcs_uri):
     """
     Downloads an image from Google Cloud Storage using the initialized storage client in Flask config.

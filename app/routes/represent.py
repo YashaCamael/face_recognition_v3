@@ -16,23 +16,23 @@ def represent():
 
     instances = data['instances']
     parameters = data.get('parameters', {})
-    
+
     if not instances:
         return jsonify({'error': 'No instances provided'}), 400
 
     predictions = []
 
     for instance in instances:
-        # Generate a unique filename for the image
-        unique_filename = f"{uuid.uuid4()}.jpg"
-
         img_path = None
 
         try:
-            # Handle image input
+            # Handle image input and generate a unique filename based on the image type
             if 'img_base64' in instance:
-                img_path = save_image_from_base64(instance['img_base64'], unique_filename)
+                # Create a base filename without extension, extension will be detected
+                unique_filename_base = f"{uuid.uuid4()}"
+                img_path = save_image_from_base64(instance['img_base64'], unique_filename_base)
             elif 'img_link' in instance:
+                unique_filename = f"{uuid.uuid4()}.jpg"
                 img_path = save_image_from_url(instance['img_link'], unique_filename)
             elif 'img_gcs_uri' in instance:
                 img_path = download_image_from_gcs(instance['img_gcs_uri'])
