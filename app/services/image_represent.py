@@ -28,6 +28,10 @@ def process_represent_result(result):
 
 def represent_image(img_path, parameters):
     try:
+        # Fetch anti_spoofing from parameters and convert it to boolean
+        anti_spoofing_str = parameters.get('anti_spoofing', 'false')  # Default to 'false' if not provided
+        anti_spoofing = anti_spoofing_str.lower() == 'true'  # Convert to boolean
+
         # Extract features from the image using DeepFace
         result = DeepFace.represent(
             img_path,
@@ -36,21 +40,22 @@ def represent_image(img_path, parameters):
             enforce_detection=parameters.get('enforce_detection', True),
             align=parameters.get('align', True),
             normalization=parameters.get('normalization', 'base'),
-            anti_spoofing=parameters.get('anti_spoofing', False)
+            anti_spoofing=anti_spoofing  # Use the converted boolean value
         )
         
         # Process the result
-        # simplified_result = process_represent_result(result)
-
-        # Return the formatted result response
-        # return {"predictions": simplified_result}
-        return {"predictions": result}
+        return {"predictions": process_represent_result(result)}
     
     except ValueError as e:
         error_message = str(e)
         
         if 'Face could not be detected' in error_message:
             error_message = "Face could not be detected in the image. Please confirm that the picture is a face photo or set enforce_detection to False."
+        
+        # Add spoof detection error handling
+        elif 'Spoof detected' in error_message:
+            error_message = "Spoof detected in the given image. Please ensure that the image is not altered or manipulated."
+
         else:
             error_message = "An error occurred while processing the image."
 

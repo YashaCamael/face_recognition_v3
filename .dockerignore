@@ -2,3 +2,77 @@ AI/
 AI/bin/python
 AI/bin/python3
 notebook/
+
+# Ignore the virtual environments
+env/
+venv/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+
+# Ignore Python bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore environment and configuration files
+*.env
+*.flaskenv
+*.config
+
+# Ignore log files
+*.log
+
+# Ignore local directories and files that shouldn't be in the Docker image
+instance/
+uploads/
+mediafiles/
+staticfiles/
+
+# Ignore Git files
+.git/
+.gitignore
+
+# Ignore IDE/editor configuration files
+.vscode/
+.idea/
+*.iml
+
+# Ignore Docker-specific files that shouldn't be in the Docker image
+docker-compose.override.yml
+.dockerignore
+Dockerfile
+
+# Ignore test and coverage directories
+.pytest_cache/
+.cache/
+coverage/
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+
+# Ignore backup and temporary files
+*.bak
+*.swp
+*.tmp
+*.temp
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Ignore macOS specific files
+.DS_Store
+
+# Ignore Windows specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Ignore unnecessary application files
+*.sqlite3
+db.sqlite3

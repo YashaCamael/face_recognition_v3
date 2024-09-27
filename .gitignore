@@ -2,3 +2,91 @@ AI/
 *.pyc
 uploads/
 notebook/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask and Python environment specific
+instance/
+.venv/
+*.env
+*.flaskenv
+
+# Pytest
+.cache/
+.pytest_cache/
+
+# Static and media files
+staticfiles/
+mediafiles/
+
+# Flask logs
+*.log
+
+# Django stuff:
+*.sqlite3
+db.sqlite3
+
+# Flask uploads
+uploads/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code settings
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Backup files
+*.bak
+*.swp
+
+# IDEs
+.idea/
+*.iml
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+Dockerfile
+
+# Pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# Pyre type checker
+.pyre/
+
+.json
+.sh

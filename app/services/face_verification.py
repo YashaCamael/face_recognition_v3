@@ -33,7 +33,7 @@ def verify_faces(img1_path, img2_path, parameters):
     
     except ValueError as e:
         error_message = str(e)
-        
+
         if 'Face could not be detected' in error_message:
             if img1_path in error_message:
                 error_message = "Face could not be detected in img1. Please confirm that the picture is a face photo or set enforce_detection to False."
@@ -47,6 +47,10 @@ def verify_faces(img1_path, img2_path, parameters):
 
         elif 'Exception while processing img2_path' in error_message:
             error_message = "An exception occurred while processing img2. Please check the image file or try again later."
+
+        # Handle spoof detection error
+        elif 'Spoof detected' in error_message:
+            error_message = "Spoof detected in the given image. Please ensure that the image is not altered or manipulated."
 
         # Include error and verification status in predictions array
         return {"predictions": [{"error": error_message, "verified": False}]}
