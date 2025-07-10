@@ -30,4 +30,5 @@ COPY . .
 RUN python download_models.py
 
 # Command to run the app using Gunicorn
-CMD ["python","wsgi.py"]
+CMD ["gunicorn", "-w", "2", "--timeout", "60", "-b", "0.0.0.0:8080", "wsgi:application"]
+# CMD ["python","wsgi.py"]
