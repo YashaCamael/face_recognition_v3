@@ -1,1 +1,1 @@
-gcloud build submit --config cloudbuild.yaml --project $PROJECT_ID --region $REGION
+gcloud builds submit "https://github.com/YashaCamael/face_recognition_v3.git" --git-source-revision=main --project subsidi-tepat-bbm-ai-dev --region asia-southeast2

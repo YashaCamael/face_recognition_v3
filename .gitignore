@@ -90,3 +90,5 @@ poetry.lock
 
 .json
 .sh
+
+/notebook

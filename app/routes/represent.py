@@ -1,18 +1,16 @@
 from flask import Blueprint, request, jsonify
 from app.services.image_represent import represent_image
-from app.utils.image_handler import save_image_from_base64, save_image_from_url, download_image_from_gcs
-import uuid
-import os
+from app.utils.image_handler import load_image_from_base64, load_image_from_url, load_image_from_gcs
 
 represent_bp = Blueprint('represent_bp', __name__)
 
 @represent_bp.route('/represent', methods=['POST'])
 def represent():
+    """Receives image data and returns facial representation embeddings."""
     data = request.get_json()
 
-    # Check if 'instances' exists and is a list
-    if 'instances' not in data or not isinstance(data.get('instances'), list):
-        return jsonify({'error': 'Invalid payload format, "instances" must be a list of dictionaries'}), 400
+    if not data or 'instances' not in data or not isinstance(data.get('instances'), list):
+        return jsonify({'error': 'Invalid payload format'}), 400
 
     instances = data['instances']
     parameters = data.get('parameters', {})
@@ -20,47 +18,36 @@ def represent():
     if not instances:
         return jsonify({'error': 'No instances provided'}), 400
 
+    face_anti_spoofing = parameters.get('face_anti_spoofing', True)
+
     predictions = []
 
     for instance in instances:
-        img_path = None
-
+        img_array = None
         try:
-            # Handle image input and generate a unique filename based on the image type
             if 'img_base64' in instance:
-                # Create a base filename without extension, extension will be detected
-                unique_filename_base = f"{uuid.uuid4()}"
-                img_path = save_image_from_base64(instance['img_base64'], unique_filename_base)
+                img_array = load_image_from_base64(instance['img_base64'])
             elif 'img_link' in instance:
-                unique_filename = f"{uuid.uuid4()}.jpg"
-                img_path = save_image_from_url(instance['img_link'], unique_filename)
+                img_array = load_image_from_url(instance['img_link'])
             elif 'img_gcs_uri' in instance:
-                img_path = download_image_from_gcs(instance['img_gcs_uri'])
+                img_array = load_image_from_gcs(instance['img_gcs_uri'])
 
-            if not img_path:
-                predictions.append({"error": "Please provide valid image data for one or more images"})
-                continue  # Skip to the next instance
+            if img_array is None:
+                predictions.append({"error": "No valid image data provided in instance"})
+                continue
 
-            # Call the represent function
-            result = represent_image(img_path, parameters)
+            # Pass the renamed flag to the service function
+            result = represent_image(img_array, parameters, face_anti_spoofing)
 
-            # Ensure the result is a dictionary with 'predictions' as a list
             if 'predictions' in result and isinstance(result['predictions'], list):
-                # Append the content of 'predictions' list
                 predictions.extend(result['predictions'])
             else:
-                predictions.append({"error": "Unexpected result format from represent_image function"})
+                predictions.append({"error": "Unexpected result format from service"})
 
         except Exception as e:
-            predictions.append({"error": "An unexpected error occurred: " + str(e)})
+            predictions.append({"error": f"An unexpected error occurred: {e}"})
 
-        finally:
-            # Ensure that any created files are cleaned up
-            if img_path and os.path.exists(img_path):
-                os.remove(img_path)
-
-    # Check if there are multiple faces detected
     if len(predictions) > 1:
-        return jsonify({"predictions": [{"error": "Detected 2 or more photos KTP"}]}), 400
+        return jsonify({"predictions": [{"error": "Detected 2 or more faces"}]}), 400
 
     return jsonify({"predictions": predictions})
