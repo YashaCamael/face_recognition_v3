@@ -22,7 +22,7 @@ steps:
       - 'deploy'
       - '${_SERVICE_NAME}'
       - '--image=${_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
-      - '--region=asia-southeast1
+      - '--region=asia-southeast1'
       - '--platform=managed'
       - '--port=8080'
       - '--execution-environment=gen2'
