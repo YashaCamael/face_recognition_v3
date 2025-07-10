@@ -93,3 +93,4 @@ poetry.lock
 
 notebook/
 cicd.sh
+test.json
