@@ -22,7 +22,7 @@ steps:
       - 'deploy'
       - '${_SERVICE_NAME}'
       - '--image=${_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
-      - '--region=${_LOCATION}'
+      - '--region=asia-southeast1
       - '--platform=managed'
       - '--port=8080'
       - '--execution-environment=gen2'
@@ -40,7 +40,7 @@ steps:
 substitutions:
   _SERVICE_NAME: 'face-embedding-svc'
   _REPOSITORY: 'cloud-run-source-deploy' # e.g., 'ml-image'
-  _LOCATION: 'asia-southeast1'
+  _LOCATION: 'asia-southeast2'
   _SERVICE_ACCOUNT: 'vertex-ai-svc@subsidi-tepat-bbm-ai-dev.iam.gserviceaccount.com' # e.g., 'my-service@project-id.iam.gserviceaccount.com'
   _TARGET_PROJECT_ID: 'subsidi-tepat-bbm-ai-dev'
 
