@@ -1,1 +1,0 @@
-gcloud builds submit "https://github.com/YashaCamael/face_recognition_v3.git" --git-source-revision=main --project subsidi-tepat-bbm-ai-dev --region asia-southeast2

@@ -91,4 +91,5 @@ poetry.lock
 .json
 .sh
 
-/notebook
+notebook/
+cicd.sh
