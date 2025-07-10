@@ -4,7 +4,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      - '${_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '${_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
       - '.'
     id: 'Build'
 
@@ -12,7 +12,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - '${_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '${_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
     id: 'Push'
 
   # 3. Deploy container image to Cloud Run
@@ -21,7 +21,7 @@ steps:
       - 'run'
       - 'deploy'
       - '${_SERVICE_NAME}'
-      - '--image=${_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '--image=${_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
       - '--region=${_LOCATION}'
       - '--platform=managed'
       - '--port=8080'
