@@ -2,30 +2,26 @@ from flask import Flask
 import logging
 import sys
 import os
-from google.cloud import storage  # Import Google Cloud Storage client
-from app.services.face_verification import verify_faces
 import tensorflow as tf
-
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disable GPU
+from google.cloud import storage
+import google.cloud.logging
 
 def create_app():
-    # Configure logging to use stdout and set the log level to INFO
-    logging.basicConfig(
-        stream=sys.stdout,  # Send logs to stdout
-        level=logging.INFO,  # Set the default log level to INFO
-        # format='[%(levelname)s] %(name)s: %(message)s'
-    )
-
+    """Initializes and configures the Flask application."""
+    
     app = Flask(__name__)
-    app.config['UPLOAD_FOLDER'] = 'uploads/'
+    
+    # Instantiate Google Cloud clients
+    storage_client = storage.Client()
+    logging_client = google.cloud.logging.Client()
 
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
-        os.makedirs(app.config['UPLOAD_FOLDER'])
+    # Set up structured logging for Cloud Run compatibility
+    logging_client.setup_logging()
 
-    # Initialize the Google Cloud Storage client using ADC
-    storage_client = storage.Client()  # No manual credentials needed with ADC
-    app.config['STORAGE_CLIENT'] = storage_client  # Store the client in app config
+    # Store the storage client in app config for access in other parts of the app
+    app.config['STORAGE_CLIENT'] = storage_client
 
+    # Import and register the API blueprints
     from app.routes.verify import verify_bp
     from app.routes.home import home_bp
     from app.routes.represent import represent_bp
@@ -34,21 +30,20 @@ def create_app():
     app.register_blueprint(home_bp)
     app.register_blueprint(represent_bp)
 
-    # Run the detection function
+    # Check and log the available hardware (CPU/GPU) on startup
     detect_device()
 
     return app
 
-# Detecting if TensorFlow is using GPU
 def detect_device():
+    """Detects and prints the available TensorFlow devices."""
+    
     devices = tf.config.list_physical_devices()
-
-    print("Available devices:")
+    logging.info("Available TensorFlow devices:")
     for device in devices:
-        print(device)
+        logging.info(device)
 
     if tf.config.list_physical_devices('GPU'):
-        print("DeepFace is using a GPU via TensorFlow")
-        print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+        logging.info("TensorFlow is configured to use a GPU.")
     else:
-        print("DeepFace is using a CPU via TensorFlow")
+        logging.info("TensorFlow is configured to use a CPU.")

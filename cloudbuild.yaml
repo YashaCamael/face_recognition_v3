@@ -1,13 +1,52 @@
 steps:
+  # 1. Build the container image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/$IMAGE_NAME', '.']
+    args:
+      - 'build'
+      - '-t'
+      - '${_AR_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '.'
+    id: 'Build'
+
+  # 2. Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/$IMAGE_NAME']
+    args:
+      - 'push'
+      - '${_AR_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+    id: 'Push'
 
+  # 3. Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image=${_AR_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '--project=${_TARGET_PROJECT_ID}'
+      - '--region=${_TARGET_LOCATION}'
+      - '--platform=managed'
+      - '--port=8080'
+      - '--execution-environment=gen2'
+      - '--cpu=4'
+      - '--memory=16Gi'
+      - '--no-cpu-throttling'
+      - '--gpu-type=nvidia-l4'
+      - '--gpu=1'
+      - '--no-gpu-zonal-redundancy'
+      - '--service-account=${_SERVICE_ACCOUNT}'   
+      - '--allow-unauthenticated'            
+    id: 'Deploy'
 
-
-images:
-  - 'gcr.io/$PROJECT_ID/$IMAGE_NAME'
-
+# Define user-configurable variables
 substitutions:
-  _IMAGE_NAME: $IMAGE_NAME
+  _SERVICE_NAME: 'face-embedding-svc'
+  _REPOSITORY: 'cloud-run-source-deploy' # e.g., 'ml-image'
+  _AR_LOCATION: 'asia-southeast2'
+  _SERVICE_ACCOUNT: 'vertex-ai-svc@subsidi-tepat-bbm-ai-dev.iam.gserviceaccount.com' # e.g., 'my-service@project-id.iam.gserviceaccount.com'
+  _TARGET_PROJECT_ID: 'subsidi-tepat-bbm-ai-dev'
+  _TARGET_LOCATION: 'asia-southeast1'
+
+# Store the built image in Artifact Registry
+# images:
+#   - '${_AR_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}'

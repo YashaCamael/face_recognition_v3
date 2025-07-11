@@ -1,8 +1,9 @@
-import os
+import logging
+import concurrent.futures
 from deepface import DeepFace
-from flask import jsonify
 
 def process_represent_result(result):
+    """Formats the raw DeepFace result into a simplified list of dictionaries."""
     simplified_result = []
     if isinstance(result, list):
         for res_item in result:
@@ -14,7 +15,7 @@ def process_represent_result(result):
                 }
                 simplified_result.append(face_data)
             else:
-                print(f"Warning: Unexpected item type in DeepFace.represent result list: {type(res_item)}")
+                logging.warning(f"Unexpected item type in result list: {type(res_item)}")
     elif isinstance(result, dict):
         face_data = {
             "embedding": result.get("embedding", []),
@@ -24,91 +25,74 @@ def process_represent_result(result):
         simplified_result.append(face_data)
     return simplified_result
 
-def represent_image(img_path, parameters):
-    is_real_value_to_add = None
-    antispoof_score_value_to_add = None
-    
+def task_run_antispoof(img_array):
+    """Task to run anti-spoofing check."""
     try:
-        anti_spoofing_str = parameters.get('anti_spoofing', 'false')
-        anti_spoofing_for_represent = anti_spoofing_str.lower() == 'true'
-
-        try:
-            anti_spoofing_extraction_result = DeepFace.extract_faces(
-                img_path=img_path,
-                detector_backend='retinaface',
-                enforce_detection=True,
-                anti_spoofing=True
-            )
-
-            if anti_spoofing_extraction_result and len(anti_spoofing_extraction_result) > 0:
-                first_item = anti_spoofing_extraction_result[0]
-                if 'antispoof_score' in first_item:
-                    antispoof_score_value_to_add = first_item['antispoof_score']
-                if 'is_real' in first_item:
-                    is_real_value_to_add = first_item['is_real']
-                
-                print(f"Extracted Antispoof Score: {antispoof_score_value_to_add}")
-                print(f"Extracted Is Real: {is_real_value_to_add}")
-            else:
-                print("Anti-spoofing check (DeepFace.extract_faces) did not return any face data.")
-        except Exception as e_extract:
-            print(f"Info: Could not get anti-spoofing scores from DeepFace.extract_faces: {type(e_extract).__name__} - {e_extract}")
-
-        result_from_represent = DeepFace.represent(
-            img_path,
-            model_name=parameters.get('model_name', 'Facenet512'),
-            detector_backend=parameters.get('detector_backend', 'retinaface'),
-            enforce_detection=parameters.get('enforce_detection', True),
-            align=parameters.get('align', True),
-            normalization=parameters.get('normalization', 'base'),
-            anti_spoofing=anti_spoofing_for_represent
+        result = DeepFace.extract_faces(
+            img_path=img_array,
+            detector_backend='retinaface',
+            enforce_detection=True,
+            anti_spoofing=True
         )
-        
-        predictions_list = process_represent_result(result_from_represent)
+        if result:
+            first_item = result[0]
+            return first_item.get('is_real'), first_item.get('antispoof_score')
+    except Exception as e:
+        logging.info(f"Anti-spoofing task failed: {e}")
+    return None, None
+
+def task_run_represent(img_array, parameters):
+    """Task to generate facial embeddings."""
+    result = DeepFace.represent(
+        img_array,
+        model_name=parameters.get('model_name', 'Facenet512'),
+        detector_backend=parameters.get('detector_backend', 'retinaface'),
+        enforce_detection=parameters.get('enforce_detection', True),
+        align=parameters.get('align', True),
+        normalization=parameters.get('normalization', 'base')
+    )
+    return process_represent_result(result)
+
+def represent_image(img_array, parameters, face_anti_spoofing: bool):
+    """Generates facial embeddings, conditionally running anti-spoofing in parallel."""
+    is_real = None
+    antispoof_score = None
+    predictions_list = []
+
+    try:
+        # OPTIONAL TWEAK: Adjust max_workers based on the number of tasks
+        max_workers = 2 if face_anti_spoofing else 1
+
+        with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+            future_antispoof = None
+            if face_anti_spoofing:
+                # Only submit the anti-spoofing task if enabled
+                future_antispoof = executor.submit(task_run_antispoof, img_array)
+            
+            future_represent = executor.submit(task_run_represent, img_array, parameters)
+
+            if future_antispoof:
+                is_real, antispoof_score = future_antispoof.result()
+            
+            predictions_list = future_represent.result()
 
         if predictions_list:
             for prediction_item in predictions_list:
-                prediction_item['is_real'] = is_real_value_to_add
-                prediction_item['antispoof_score'] = antispoof_score_value_to_add
-        else:
-            print("No embedding predictions generated by DeepFace.represent/process_represent_result.")
-
+                prediction_item['is_real'] = is_real
+                prediction_item['antispoof_score'] = antispoof_score
+        
         return {"predictions": predictions_list}
-    
+
     except ValueError as e:
         error_message_str = str(e)
         final_error_message = ""
-        
         if 'Face could not be detected' in error_message_str:
-            final_error_message = "Face could not be detected in the image. Please confirm that the picture is a face photo or set enforce_detection to False."
+            final_error_message = "Face could not be detected in the image."
         elif 'Spoof detected' in error_message_str:
-            final_error_message = "Spoof detected in the given image. Please ensure that the image is not altered or manipulated."
+            final_error_message = "Spoof detected in the given image."
         else:
             final_error_message = f"A ValueError occurred: {error_message_str}"
-
-        return {"predictions": [{
-            "error": final_error_message,
-            "embedding": None, 
-            "facial_area": None, 
-            "face_confidence": None, 
-            "is_real": is_real_value_to_add,
-            "antispoof_score": antispoof_score_value_to_add
-        }]}
+        return {"predictions": [{"error": final_error_message, "embedding": None, "facial_area": None, "face_confidence": None, "is_real": is_real, "antispoof_score": antispoof_score}]}
 
     except Exception as e:
-        return {"predictions": [{
-            "error": "An unexpected error occurred: " + str(e),
-            "embedding": None, 
-            "facial_area": None, 
-            "face_confidence": None, 
-            "is_real": is_real_value_to_add,
-            "antispoof_score": antispoof_score_value_to_add
-        }]}
-    
-    finally:
-        if 'img_path' in locals() and img_path and os.path.exists(img_path):
-            try:
-                os.remove(img_path)
-                print(f"Cleaned up image file: {img_path}")
-            except Exception as e_remove:
-                print(f"Warning: Could not remove image file {img_path}: {e_remove}")
+        return {"predictions": [{"error": "An unexpected error occurred: " + str(e), "embedding": None, "facial_area": None, "face_confidence": None, "is_real": is_real, "antispoof_score": antispoof_score}]}

@@ -1,1 +1,0 @@
-gcloud build submit --config cloudbuild.yaml --project $PROJECT_ID --region $REGION
