@@ -88,5 +88,5 @@ poetry.lock
 # Pyre type checker
 .pyre/
 
-.json
-.sh
+*.json
+*.sh
