@@ -4,7 +4,8 @@ Flask-Cors
 gunicorn
 
 # Core ML and Cloud Libraries
-tensorflow==2.16.1
+tensorflow==2.13.1
+keras==2.13.1
 deepface==0.0.93
 google-cloud-storage
 google-cloud-logging
