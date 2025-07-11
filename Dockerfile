@@ -1,7 +1,7 @@
 # Base Python image
 # FROM asia-southeast2-docker.pkg.dev/subsidi-tepat-bbm-ai/tensorflow-base/tensorflow:2.16.1-gpu
-# FROM asia-southeast2-docker.pkg.dev/subsidi-tepat-bbm-ai-dev/ml-image/tensorflow:2.16.1-gpu
-FROM tensorflow/tensorflow:2.13.0-gpu
+FROM asia-southeast2-docker.pkg.dev/subsidi-tepat-bbm-ai-dev/ml-image/tensorflow:2.16.1-gpu
+# FROM tensorflow/tensorflow:2.16.0-gpu
 
 # Set the HOME environment variable to /app to use /app/.deepface/weights as the model path
 ENV HOME=/app
@@ -31,5 +31,5 @@ COPY . .
 RUN python download_models.py
 
 # Command to run the app using Gunicorn
-# CMD ["gunicorn", "-w", "2", "--timeout", "60", "-b", "0.0.0.0:8080", "wsgi:application"]
-CMD ["python","wsgi.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--threads", "8", "--timeout", "900", "wsgi:application"]
+# CMD ["python","wsgi.py"]

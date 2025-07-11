@@ -16,7 +16,8 @@ steps:
     id: 'Push'
 
   # 3. Deploy container image to Cloud Run
-  - name: 'gcr.io/cloud-builders/gcloud'
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'gcloud'
     args:
       - 'run'
       - 'deploy'
@@ -47,5 +48,5 @@ substitutions:
   _TARGET_LOCATION: 'asia-southeast1'
 
 # Store the built image in Artifact Registry
-images:
-  - '${_AR_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}'
+# images:
+#   - '${_AR_LOCATION}-docker.pkg.dev/${_TARGET_PROJECT_ID}/${_REPOSITORY}/${_SERVICE_NAME}:${COMMIT_SHA}'
