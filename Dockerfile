@@ -1,7 +1,7 @@
 # Base Python image
 # FROM asia-southeast2-docker.pkg.dev/subsidi-tepat-bbm-ai/tensorflow-base/tensorflow:2.16.1-gpu
-FROM asia-southeast2-docker.pkg.dev/subsidi-tepat-bbm-ai-dev/ml-image/tensorflow:2.16.1-gpu
-# FROM tensorflow/tensorflow:2.16.0-gpu
+# FROM asia-southeast2-docker.pkg.dev/subsidi-tepat-bbm-ai-dev/ml-image/tensorflow:2.16.1-gpu
+FROM tensorflow/tensorflow:2.14.0-gpu
 
 # Set the HOME environment variable to /app to use /app/.deepface/weights as the model path
 ENV HOME=/app
