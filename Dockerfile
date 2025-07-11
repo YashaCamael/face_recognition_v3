@@ -1,6 +1,7 @@
 # Base Python image
 # FROM asia-southeast2-docker.pkg.dev/subsidi-tepat-bbm-ai/tensorflow-base/tensorflow:2.16.1-gpu
-FROM asia-southeast2-docker.pkg.dev/subsidi-tepat-bbm-ai-dev/ml-image/tensorflow:2.16.1-gpu
+# FROM asia-southeast2-docker.pkg.dev/subsidi-tepat-bbm-ai-dev/ml-image/tensorflow:2.16.1-gpu
+FROM python:3.10
 
 # Set the HOME environment variable to /app to use /app/.deepface/weights as the model path
 ENV HOME=/app
@@ -21,7 +22,7 @@ COPY requirements.txt .
 RUN pip install --ignore-installed -r requirements.txt
 
 # Install Gunicorn
-RUN pip install gunicorn
+# RUN pip install gunicorn
 
 # Copy the rest of the application code into the container at /app
 COPY . .
