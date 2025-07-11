@@ -63,7 +63,7 @@ def represent_image(img_array, parameters, face_anti_spoofing: bool):
         # OPTIONAL TWEAK: Adjust max_workers based on the number of tasks
         max_workers = 2 if face_anti_spoofing else 1
 
-        with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_antispoof = None
             if face_anti_spoofing:
                 # Only submit the anti-spoofing task if enabled
