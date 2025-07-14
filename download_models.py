@@ -15,7 +15,13 @@ def download_file(url, destination):
 home = os.path.expanduser("~")
 destination_path_facenet = os.path.join(home, ".deepface/weights/facenet512_weights.h5")
 destination_path_retinaface = os.path.join(home, ".deepface/weights/retinaface.h5")
+destination_path_minifastnetv2 = os.path.join(home, ".deepface/weights/2.7_80x80_MiniFASNetV2.pth")
+destination_path_minifastnetv1 = os.path.join(home, ".deepface/weights/4_0_0_80x80_MiniFASNetV1SE.pth")
 
 # Download the files from public URLs
 download_file("https://storage.googleapis.com/model_face_recognition/facenet512_weights.h5", destination_path_facenet)
 download_file("https://storage.googleapis.com/model_face_recognition/retinaface.h5", destination_path_retinaface)
+download_file("https://storage.googleapis.com/model_face_recognition/2.7_80x80_MiniFASNetV2.pth", destination_path_minifastnetv2)
+download_file("https://storage.googleapis.com/model_face_recognition/4_0_0_80x80_MiniFASNetV1SE.pth", destination_path_minifastnetv1)
+
+
