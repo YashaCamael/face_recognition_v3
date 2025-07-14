@@ -4,7 +4,7 @@ from app.utils.image_handler import load_image_from_base64, load_image_from_url,
 
 embedding_bp = Blueprint('embedding_bp', __name__)
 
-@embedding_bp.route('/embedding', methods=['POST'])
+@embedding_bp.route('/represent', methods=['POST'])
 def embedding_route():
     data = request.get_json()
     if not data or 'instances' not in data or not data['instances']:
