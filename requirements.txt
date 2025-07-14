@@ -12,3 +12,9 @@ google-cloud-logging
 google-cloud-trace
 torch
 torchvision
+
+# --- NEW Tracing Libraries (OpenTelemetry) ---
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-flask
+opentelemetry-exporter-gcp-trace

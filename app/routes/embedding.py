@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.services.embedding_service import get_embedding
+from app.services.embedding import get_embedding
 from app.utils.image_handler import load_image_from_base64, load_image_from_url, load_image_from_gcs
 
 embedding_bp = Blueprint('embedding_bp', __name__)

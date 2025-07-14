@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.services.antispoofing_service import get_antispoof_data
+from app.services.antispoofing import get_antispoof_data
 from app.utils.image_handler import load_image_from_base64, load_image_from_url, load_image_from_gcs
 
 antispoof_bp = Blueprint('antispoof_bp', __name__)

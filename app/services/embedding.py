@@ -1,12 +1,14 @@
 from deepface import DeepFace
-from google.cloud.trace import Tracer
+from opentelemetry import trace
 
-tracer = Tracer()
+# Get a tracer for this specific module
+tracer = trace.get_tracer(__name__)
 
 def get_embedding(img_array, parameters):
     """Generates a facial embedding for a given image array."""
     try:
-        with tracer.span(name="deepface.represent"):
+        # Create a custom span to measure this specific operation
+        with tracer.start_as_current_span("deepface.represent"):
             embedding_obj = DeepFace.represent(
                 img_path=img_array,
                 model_name=parameters.get('model_name', 'Facenet512'),

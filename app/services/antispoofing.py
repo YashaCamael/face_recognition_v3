@@ -1,12 +1,14 @@
 from deepface import DeepFace
-from google.cloud.trace import Tracer
+from opentelemetry import trace
 
-tracer = Tracer()
+# Get a tracer for this specific module
+tracer = trace.get_tracer(__name__)
 
 def get_antispoof_data(img_array):
     """Performs an anti-spoofing check on a given image array."""
     try:
-        with tracer.span(name="deepface.extract_faces.antispoof"):
+        # Create a custom span to measure this specific operation
+        with tracer.start_as_current_span("deepface.extract_faces.antispoof"):
             result = DeepFace.extract_faces(
                 img_path=img_array,
                 detector_backend='retinaface',
