@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory to /app
+# Set the aorking directory to /app
 WORKDIR /app
 
 # Copy the requirements file used for dependencies
@@ -32,5 +32,5 @@ COPY . .
 RUN python download_models.py
 
 # Command to run the app using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--threads", "16", "--timeout", "900", "wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4", "--threads", "4", "--timeout", "900", "wsgi:application"]
 # CMD ["python","wsgi.py"]
