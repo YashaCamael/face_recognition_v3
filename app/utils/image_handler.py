@@ -1,20 +1,21 @@
 import numpy as np
-import cv2
+from PIL import Image
 import base64
 import requests
 from flask import current_app
 from google.cloud import storage
+import io
 
 def bytes_to_numpy_array(image_bytes: bytes) -> np.ndarray:
-    """Decodes a byte string into a NumPy array."""
-    np_array = np.frombuffer(image_bytes, np.uint8)
-    image_array = cv2.imdecode(np_array, -1)
-
-    if image_array is None:
-        # If decoding fails, raise an error immediately.
-        raise ValueError("Could not decode image from bytes.")
-        
-    return image_array
+    """Decodes a byte string into a NumPy array using Pillow-SIMD."""
+    try:
+        image = Image.open(io.BytesIO(image_bytes))
+        # Convert to RGB if necessary
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        return np.array(image)
+    except Exception as e:
+        raise ValueError(f"Could not decode image from bytes: {e}")
 
 def load_image_from_base64(base64_str: str) -> np.ndarray:
     """Decodes a Base64 string into a NumPy array."""
@@ -35,8 +36,6 @@ def load_image_from_gcs(gcs_uri: str, storage_client=None) -> np.ndarray:
     Downloads an image from GCS into a NumPy array.
     If no storage_client is provided, it uses the one from the Flask app context.
     """
-    # If the function is called from a test, use the provided client.
-    # If called from the Flask app, this will be None.
     if storage_client is None:
         storage_client = current_app.config['STORAGE_CLIENT']
     

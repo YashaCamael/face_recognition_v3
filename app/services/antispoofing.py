@@ -1,8 +1,17 @@
 from deepface import DeepFace
 from opentelemetry import trace
+import tensorflow as tf
+import logging
 
 # Get a tracer for this specific module
 tracer = trace.get_tracer(__name__)
+
+# Check for GPU availability
+physical_devices = tf.config.list_physical_devices('GPU')
+if len(physical_devices) > 0:
+    logging.info(f"{len(physical_devices)} GPU(s) available.")
+else:
+    logging.warning("No GPU available, using CPU.")
 
 def get_antispoof_data(img_array):
     """Performs an anti-spoofing check on a given image array."""

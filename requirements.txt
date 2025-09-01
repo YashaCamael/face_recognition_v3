@@ -12,6 +12,8 @@ google-cloud-logging
 google-cloud-trace
 torch
 torchvision
+Pillow-SIMD
+opencv-python-headless
 
 # --- NEW Tracing Libraries (OpenTelemetry) ---
 opentelemetry-api
