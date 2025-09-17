@@ -6,26 +6,46 @@ embedding_bp = Blueprint('embedding_bp', __name__)
 
 @embedding_bp.route('/represent', methods=['POST'])
 def embedding_route():
+    # --- Get the request data ---
     data = request.get_json()
-    if not data or 'instances' not in data or not data['instances']:
+    if not data or 'instances' not in data or not isinstance(data['instances'], list):
         return jsonify({"predictions": [{"error": "Invalid payload format"}]}), 400
 
-    instance = data['instances'][0]
+    # --- Prepare to collect results for all instances ---
+    all_predictions = []
     parameters = data.get('parameters', {})
     
-    img_array = None
-    try:
-        if 'img_base64' in instance:
-            img_array = load_image_from_base64(instance['img_base64'])
-        elif 'img_link' in instance:
-            img_array = load_image_from_url(instance['img_link'])
-        elif 'img_gcs_uri' in instance:
-            img_array = load_image_from_gcs(instance['img_gcs_uri'])
-    except Exception as e:
-        return jsonify({"predictions": [{"error": f"Failed to load image: {e}"}]}), 400
+    # --- MODIFIED: Loop through each instance in the batch ---
+    for instance in data['instances']:
+        img_array = None
+        error_message = None
 
-    if img_array is None:
-        return jsonify({"predictions": [{"error": "No valid image data provided"}]}), 400
+        # --- Load image for the current instance ---
+        try:
+            if 'img_base64' in instance:
+                img_array = load_image_from_base64(instance['img_base64'])
+            elif 'img_link' in instance:
+                img_array = load_image_from_url(instance['img_link'])
+            elif 'img_gcs_uri' in instance:
+                img_array = load_image_from_gcs(instance['img_gcs_uri'])
+            else:
+                error_message = "No valid image key (img_base64, img_link, img_gcs_uri) provided in instance"
+        
+        except Exception as e:
+            error_message = f"Failed to load image: {e}"
 
-    result = get_embedding(img_array, parameters)
-    return jsonify(result)
+        # --- Get embedding or append the error for this instance ---
+        if error_message:
+            # If there was an error loading the image, add an error prediction
+            all_predictions.append({"error": error_message})
+        elif img_array is not None:
+            # If image loaded successfully, get the embedding
+            result = get_embedding(img_array, parameters)
+            # The get_embedding function returns {"predictions": [...]}, so we extend our list
+            all_predictions.extend(result.get("predictions", []))
+        else:
+            # Fallback for an unknown image loading issue
+            all_predictions.append({"error": "No valid image data provided"})
+            
+    # --- MODIFIED: Return the collected list of all predictions ---
+    return jsonify({"predictions": all_predictions})
