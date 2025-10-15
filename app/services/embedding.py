@@ -26,14 +26,32 @@ def get_embedding(img_array, parameters):
                 align=parameters.get('align', True),
                 normalization=parameters.get('normalization', 'base')
             )
-        
-        if embedding_obj:
-            result = {
-                "embedding": embedding_obj[0].get("embedding", []),
-                "facial_area": embedding_obj[0].get("facial_area", {}),
-                "face_confidence": embedding_obj[0].get("face_confidence", 0.0)
-            }
-            return {"predictions": [result]}
-        return {"predictions": []}
+
+        if not embedding_obj:
+            return {"predictions": [{"error": "Face could not be detected in the image."}]}
+
+        if len(embedding_obj) > 1:
+            return {"predictions": [{"error": "Detected 2 or more faces in the image."}]}
+
+        result = {
+            "embedding": embedding_obj[0].get("embedding", []),
+            "facial_area": embedding_obj[0].get("facial_area", {}),
+            "face_confidence": embedding_obj[0].get("face_confidence", 0.0)
+        }
+        return {"predictions": [result]}
+
+    except ValueError as e:
+        error_message = str(e)
+
+        if 'Face could not be detected' in error_message:
+            error_message = "Face could not be detected in the image. Please confirm that the picture is a face photo or set enforce_detection to False."
+
+        else:
+            error_message = "An error occurred while processing the image."
+
+        # Include error in predictions array
+        return {"predictions": [{"error": error_message, "embedding": [], "facial_area": {}, "face_confidence": 0.0}]}
+
     except Exception as e:
-        return {"predictions": [{"error": str(e)}]}
+        # Include error in predictions array
+        return {"predictions": [{"error": "An unexpected error occurred: " + str(e), "embedding": [], "facial_area": {}, "face_confidence": 0.0}]}

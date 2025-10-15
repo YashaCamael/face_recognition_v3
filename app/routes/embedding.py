@@ -46,6 +46,6 @@ def embedding_route():
         else:
             # Fallback for an unknown image loading issue
             all_predictions.append({"error": "No valid image data provided"})
-            
+
     # --- MODIFIED: Return the collected list of all predictions ---
     return jsonify({"predictions": all_predictions})
