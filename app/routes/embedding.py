@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.services.embedding import get_embedding
 from app.utils.image_handler import load_image_from_base64, load_image_from_url, load_image_from_gcs
-from app.utils.image_enhancer import preprocess_low_light
+from app.utils.image_enhancer import preprocess_low_light, is_low_light
 
 embedding_bp = Blueprint('embedding_bp', __name__)
 
@@ -15,6 +15,10 @@ def embedding_route():
     # --- Prepare to collect results for all instances ---
     all_predictions = []
     parameters = data.get('parameters', {})
+
+    # --- Get low-light mode settings ---
+    low_light_mode = parameters.get("low_light_mode", "auto")
+    brightness_threshold = parameters.get("brightness_threshold", 70) # Make threshold configurable
     
     # --- Loop through each instance in the batch ---
     for instance in data['instances']:
@@ -36,12 +40,24 @@ def embedding_route():
             error_message = f"Failed to load image: {e}"
 
         # --- APPLY PREPROCESSING ---
-        if img_array is not None and parameters.get("preprocess_low_light", False):
-            try:
-                img_array = preprocess_low_light(img_array) # <-- NEW: Call the enhancer
-            except Exception as e:
-                # Catch errors from preprocessing, though our func has its own logs
-                error_message = f"Failed during preprocessing: {e}"
+        if img_array is not None and not error_message:
+            
+            # Decide if we should apply the filter
+            apply_preprocessing = False
+            if low_light_mode == "force_on":
+                apply_preprocessing = True
+            elif low_light_mode == "auto":
+                # Only apply if the automatic check says it's low light
+                if is_low_light(img_array, threshold=brightness_threshold):
+                    apply_preprocessing = True
+            # Note: if mode is "force_off" or anything else, apply_preprocessing stays False
+            
+            # Run the filter if we decided to
+            if apply_preprocessing:
+                try:
+                    img_array = preprocess_low_light(img_array)
+                except Exception as e:
+                    error_message = f"Failed during low-light preprocessing: {e}"
 
         # --- Get embedding or append the error for this instance ---
         if error_message:

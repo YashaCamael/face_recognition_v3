@@ -2,6 +2,37 @@ import cv2
 import numpy as np
 import logging
 
+def is_low_light(img_array: np.ndarray, threshold: int = 70) -> bool:
+    """
+    Checks if an image is low-light by calculating its average brightness.
+    
+    Args:
+        img_array: The input image (as a BGR NumPy array).
+        threshold: The brightness value (0-255) to check against.
+                   If the average brightness is < this, it's considered low-light.
+
+    Returns:
+        True if the image is low-light, False otherwise.
+    """
+    try:
+        # Convert the image to Grayscale to get a single brightness channel
+        gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
+        
+        # Calculate the mean (average) brightness of all pixels
+        average_brightness = gray.mean()
+        
+        if average_brightness < threshold:
+            logging.info(f"Low-light detected. Average brightness: {average_brightness:.2f} < {threshold}")
+            return True
+        else:
+            logging.info(f"Image is well-lit. Average brightness: {average_brightness:.2f} >= {threshold}")
+            return False
+            
+    except Exception as e:
+        logging.error(f"Error in is_low_light check: {e}")
+        # Default to False (assume it's not low-light) if check fails
+        return False
+    
 def preprocess_low_light(img_array: np.ndarray) -> np.ndarray:
     """
     Applies Option 1: Denoise -> Enhance (CLAHE) to an image.
