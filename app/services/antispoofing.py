@@ -1,10 +1,6 @@
 from deepface import DeepFace
-from opentelemetry import trace
 import tensorflow as tf
 import logging
-
-# Get a tracer for this specific module
-tracer = trace.get_tracer(__name__)
 
 # Check for GPU availability
 physical_devices = tf.config.list_physical_devices('GPU')
@@ -16,14 +12,12 @@ else:
 def get_antispoof_data(img_array):
     """Performs an anti-spoofing check on a given image array."""
     try:
-        # Create a custom span to measure this specific operation
-        with tracer.start_as_current_span("deepface.extract_faces.antispoof"):
-            result = DeepFace.extract_faces(
-                img_path=img_array,
-                detector_backend='retinaface',
-                enforce_detection=True,
-                anti_spoofing=True
-            )
+        result = DeepFace.extract_faces(
+            img_path=img_array,
+            detector_backend='retinaface',
+            enforce_detection=True,
+            anti_spoofing=True
+        )
         
         if result:
             first_face = result[0]

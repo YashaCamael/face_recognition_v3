@@ -9,14 +9,4 @@ keras==2.13.1
 deepface==0.0.93
 google-cloud-storage
 google-cloud-logging
-google-cloud-trace
 torch
-torchvision
-Pillow-SIMD
-opencv-python-headless
-
-# --- NEW Tracing Libraries (OpenTelemetry) ---
-opentelemetry-api
-opentelemetry-sdk
-opentelemetry-instrumentation-flask
-opentelemetry-exporter-gcp-trace

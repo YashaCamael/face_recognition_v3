@@ -1,10 +1,6 @@
 from deepface import DeepFace
-from opentelemetry import trace
 import tensorflow as tf
 import logging
-
-# Get a tracer for this specific module
-tracer = trace.get_tracer(__name__)
 
 # Check for GPU availability
 physical_devices = tf.config.list_physical_devices('GPU')
@@ -16,16 +12,14 @@ else:
 def get_embedding(img_array, parameters):
     """Generates a facial embedding for a given image array."""
     try:
-        # Create a custom span to measure this specific operation
-        with tracer.start_as_current_span("deepface.represent"):
-            embedding_obj = DeepFace.represent(
-                img_path=img_array,
-                model_name=parameters.get('model_name', 'Facenet512'),
-                detector_backend=parameters.get('detector_backend', 'retinaface'),
-                enforce_detection=parameters.get('enforce_detection', True),
-                align=parameters.get('align', True),
-                normalization=parameters.get('normalization', 'base')
-            )
+        embedding_obj = DeepFace.represent(
+            img_path=img_array,
+            model_name=parameters.get('model_name', 'Facenet512'),
+            detector_backend=parameters.get('detector_backend', 'retinaface'),
+            enforce_detection=parameters.get('enforce_detection', True),
+            align=parameters.get('align', True),
+            normalization=parameters.get('normalization', 'base')
+        )
 
         if not embedding_obj:
             return {"predictions": [{"error": "Face could not be detected in the image."}]}
