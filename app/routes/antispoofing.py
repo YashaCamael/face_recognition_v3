@@ -34,5 +34,7 @@ def antispoof_route():
         return jsonify(error_response), 400
         
     result = get_antispoof_data(img_array)
-    log_api_interaction('antispoofing/antispoof', data, result, 200)
-    return jsonify(result)
+    from app.utils.logger import check_has_error
+    status_code = 400 if check_has_error(result) else 200
+    log_api_interaction('antispoofing/antispoof', data, result, status_code)
+    return jsonify(result), status_code

@@ -13,7 +13,7 @@ def embedding_route():
     if not data or 'instances' not in data or not isinstance(data['instances'], list):
         response = {"predictions": [{"error": "Invalid payload format"}]}
         log_api_interaction('embedding/represent', data, response, 400)
-        return jsonify(response), 400
+        return jsonify(response), status_code, 400
 
     # --- Prepare to collect results for all instances ---
     all_predictions = []
@@ -77,5 +77,7 @@ def embedding_route():
 
     # --- Return the collected list of all predictions ---
     response = {"predictions": all_predictions}
-    log_api_interaction('embedding/represent', data, response, 200)
-    return jsonify(response)
+    from app.utils.logger import check_has_error
+    status_code = 400 if check_has_error(response) else 200
+    log_api_interaction('embedding/represent', data, response, status_code)
+    return jsonify(response), status_code
