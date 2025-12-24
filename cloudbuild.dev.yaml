@@ -36,6 +36,7 @@ steps:
       - '--no-gpu-zonal-redundancy'
       - '--service-account=${_SERVICE_ACCOUNT}'   
       - '--allow-unauthenticated'            
+      - '--set-env-vars=GOOGLE_CLOUD_PROJECT=${_TARGET_PROJECT_ID}'
     id: 'Deploy'
 
 # Define user-configurable variables
