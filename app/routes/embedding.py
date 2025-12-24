@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.services.embedding import get_embedding
 from app.utils.image_handler import load_image_from_base64, load_image_from_url, load_image_from_gcs
 from app.utils.image_enhancer import preprocess_low_light, is_low_light
+from app.utils.logger import log_api_interaction
 
 embedding_bp = Blueprint('embedding_bp', __name__)
 
@@ -10,7 +11,9 @@ def embedding_route():
     # --- Get the request data ---
     data = request.get_json()
     if not data or 'instances' not in data or not isinstance(data['instances'], list):
-        return jsonify({"predictions": [{"error": "Invalid payload format"}]}), 400
+        response = {"predictions": [{"error": "Invalid payload format"}]}
+        log_api_interaction('embedding/represent', data, response, 400)
+        return jsonify(response), 400
 
     # --- Prepare to collect results for all instances ---
     all_predictions = []
@@ -73,4 +76,6 @@ def embedding_route():
             all_predictions.append({"error": "No valid image data provided"})
 
     # --- Return the collected list of all predictions ---
-    return jsonify({"predictions": all_predictions})
+    response = {"predictions": all_predictions}
+    log_api_interaction('embedding/represent', data, response, 200)
+    return jsonify(response)
